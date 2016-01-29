@@ -25,8 +25,8 @@ public class BroadcastListenerThread implements Runnable {
                 e.printStackTrace();
             }
 
-            String json = new String(inPacket.getData(), 0, inPacket.getLength());
-            FileUtils.writeDevicesList(json);
+            String imei = new String(inPacket.getData(), 0, inPacket.getLength());
+            FileUtils.writeDevicesList(imei, inPacket.getAddress().getHostAddress());
         }
     }
 }

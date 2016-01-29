@@ -7,10 +7,7 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * 文件操作帮助类
@@ -50,35 +47,29 @@ public class FileUtils {
         }
     }
 
-    public static void writeDevicesList(String json) {
+    public static void writeDevicesList(String imei, String ip) {
+        Map<String, String> devices;
+        Type mapType = new TypeToken<Map<String, String>>(){}.getType();
+        Gson gson = new Gson();
         try {
             File jsonFile = new File(jsonFilePath);
-            if (jsonFile.exists()) {
+            if (!jsonFile.exists()) {
                 jsonFile.createNewFile();
+                devices = new HashMap<String, String>();
+                devices.put(imei, ip);
+            } else {
+                JsonReader reader = new JsonReader(new FileReader(jsonFilePath));
+                devices = gson.fromJson(reader, mapType);
+                devices.put(imei, ip);
             }
+            try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(jsonFile), "UTF-8"))) {
+                gson.toJson(devices, mapType, out);
+            }
+            System.out.println("Device " + imei + " has been added to 'devices.json'");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        Type listType = new TypeToken<ArrayList<String>>(){}.getType();
-        Type mapType = new TypeToken<Map<String, String>>(){}.getType();
-        Gson gson = new Gson();
-        List<String> device = gson.fromJson(json, listType);
 
-        try {
-            JsonReader reader = new JsonReader(new FileReader(jsonFilePath));
-            Map<String, String> devices = gson.fromJson(reader, mapType);
-            devices.put(device.get(0), device.get(1));
-
-            try {
-                JsonWriter writer = new JsonWriter(new FileWriter(jsonFilePath));
-                gson.toJson(devices, mapType, writer);
-                System.out.println("Device " + device.get(0) + " has been added to 'devices.json'");
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 }

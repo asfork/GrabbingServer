@@ -8,17 +8,17 @@ import java.net.Socket;
  * Run server to listen to broadcast and receive images from devices in new thread
  */
 public class GrabbingServer {
-    private static int LOCAL_PORT;
+    private static int LOCAL_LISTENING_PORT;
     private static String IMG_FOLDER;
 
     public static void main(String[] args) throws Exception {
         // Load properties file to get settings
         try {
-            String local_port = FileUtils.readProperties("LOCAL_PORT");
+            String listeningPort = FileUtils.readProperties("LOCAL_LISTENING_PORT");
             IMG_FOLDER = FileUtils.readProperties("IMG_FOLDER");
 
-            if (local_port != null) {
-                LOCAL_PORT = Integer.parseInt(local_port);
+            if (listeningPort != null) {
+                LOCAL_LISTENING_PORT = Integer.parseInt(listeningPort);
             } else {
                 System.out.println("HOST_PORT or LOCAL_PORT error");
                 System.exit(1);
@@ -30,12 +30,12 @@ public class GrabbingServer {
         }
 
         // Use this port to receive broadcast packet
-        final DatagramSocket datagramSocket = new DatagramSocket(LOCAL_PORT);
+        final DatagramSocket datagramSocket = new DatagramSocket(LOCAL_LISTENING_PORT);
         // Receive UDP packet thread.
         new Thread(new BroadcastListenerThread(datagramSocket)).start();
 
         // listen to LOCAL_PORT
-        ServerSocket serverSocket = new ServerSocket(LOCAL_PORT);
+        ServerSocket serverSocket = new ServerSocket(LOCAL_LISTENING_PORT);
         if(serverSocket.isBound())
             System.out.println("Images handler thread started");
         while(true) {

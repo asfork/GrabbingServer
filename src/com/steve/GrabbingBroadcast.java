@@ -16,7 +16,7 @@ public class GrabbingBroadcast {
 
     private static String BROADCAST_ADDRESS;
     private static int HOST_PORT;
-    private static int LOCAL_PORT;
+    private static int LOCAL_BROADCAST_PORT;
 
     // Command line values
     @Option(name = "--give", aliases = "-g", metaVar = "<command>", usage = "Give broadcast to all devices in LAN")
@@ -52,13 +52,13 @@ public class GrabbingBroadcast {
         try {
             BROADCAST_ADDRESS = FileUtils.readProperties("BROADCAST_ADDRESS");
             String host_port = FileUtils.readProperties("HOST_PORT");
-            String local_port = FileUtils.readProperties("LOCAL_PORT");
+            String broadcastPort = FileUtils.readProperties("LOCAL_BROADCAST_PORT");
 
-            if (host_port != null && local_port != null) {
+            if (host_port != null && broadcastPort != null) {
                 HOST_PORT = Integer.parseInt(host_port);
-                LOCAL_PORT = Integer.parseInt(local_port);
+                LOCAL_BROADCAST_PORT = Integer.parseInt(broadcastPort);
             } else {
-                System.out.println("HOST_PORT or LOCAL_PORT error");
+                System.out.println("HOST_PORT or LOCAL_POLOCAL_PORTRT error");
                 return 1;
             }
         } catch (NullPointerException e) {
@@ -70,16 +70,16 @@ public class GrabbingBroadcast {
     }
 
     private void run() {
-        if (message.equals(ACTION_GRAB)) {
+        if (message.equals(ACTION_GRAB) && address == null) {
             //get images from all devices in LAN
             giveBroadcast(BROADCAST_ADDRESS, ACTION_GRAB);
+        } else if (message.equals(ACTION_GRAB) && address != null) {
+            // get images by device IP
+            giveBroadcast(address, ACTION_GRAB);
         } else if (message.equals(ACTION_CALL)) {
             // get available devices list in LAN
             FileUtils.removeDevicesList();
             giveBroadcast(BROADCAST_ADDRESS, ACTION_CALL);
-        } else if (address != null) {
-            // get images by device IP
-            giveBroadcast(address, ACTION_GRAB);
         } else {
             System.out.println("Unknown arguments");
         }
@@ -91,7 +91,7 @@ public class GrabbingBroadcast {
             SocketAddress socketAddress = new InetSocketAddress(inetAddress, HOST_PORT);
             try {
                 // Use local port to send broadcast packet
-                DatagramSocket datagramSocket = new DatagramSocket(LOCAL_PORT);
+                DatagramSocket datagramSocket = new DatagramSocket(LOCAL_BROADCAST_PORT);
                 try {
                     byte[] buf = new byte[1024];
                     buf = msg.getBytes();
