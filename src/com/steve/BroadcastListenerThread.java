@@ -15,7 +15,7 @@ public class BroadcastListenerThread implements Runnable {
     }
 
     public void run() {
-        System.out.println("UDP Receiver thread started.");
+        System.out.println("UDP Broadcast Listener thread started");
         while (true) {
             byte[] buf = new byte[1024];
             DatagramPacket inPacket = new DatagramPacket(buf, buf.length);

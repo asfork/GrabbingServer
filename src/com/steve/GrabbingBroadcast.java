@@ -1,11 +1,14 @@
 package com.steve;
 
+import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Get command line incoming string and send them as broadcast
@@ -19,15 +22,11 @@ public class GrabbingBroadcast {
     private static int LOCAL_PORT;
 
     // Command line values
-    @Option(name = "-g", aliases = "--grab", usage = "get images from all devices in LAN")
-    private boolean getImg = true;
+    @Option(name = "--give", aliases = "-g", metaVar = "<command>", usage = "Give broadcast to all devices in LAN")
+    private String message = "grab";
 
-    @Option(name = "-a", aliases = "--address", usage = "get images by device IP")
+    @Option(name = "--address", aliases = "-a", metaVar = "<192.0.0.*>", usage = "The IP address of the target device")
     private String address;
-
-    @Option(name = "-d", aliases = "--devices", usage = "get available devices list in LAN")
-    private boolean getDevices = true;
-
 
     public static void main(String[] args) {
         System.exit(new GrabbingBroadcast().run(args));
@@ -74,41 +73,42 @@ public class GrabbingBroadcast {
     }
 
     private void run() {
-        try {
+        if (message.equals(ACTION_GRAB)) {
+            //get images from all devices in LAN
+            giveBroadcast(BROADCAST_ADDRESS, ACTION_GRAB);
+        } else if (message.equals(ACTION_CALL)) {
+            // get available devices list in LAN
+            FileUtils.removeDevicesList();
+            giveBroadcast(BROADCAST_ADDRESS, ACTION_CALL);
+        } else if (address != null) {
             // get images by device IP
-            if (getImg && address != null) {
-                InetAddress inetAddress = InetAddress.getByName(address);
-                SocketAddress socketAddress = new InetSocketAddress(inetAddress, HOST_PORT);
-                giveBroadcast(socketAddress, ACTION_GRAB);
-            } else if (getDevices && address == null) {  //get images from all devices in LAN
-                InetAddress inetAddress = InetAddress.getByName(BROADCAST_ADDRESS);
-                SocketAddress socketAddress = new InetSocketAddress(inetAddress, HOST_PORT);
-                giveBroadcast(socketAddress, ACTION_GRAB);
-            } else if (getDevices) {   // get available devices list in LAN
-                FileUtils.removeDevicesList();
-                InetAddress inetAddress = InetAddress.getByName(BROADCAST_ADDRESS);
-                SocketAddress socketAddress = new InetSocketAddress(inetAddress, HOST_PORT);
-                giveBroadcast(socketAddress, ACTION_CALL);
-            }
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
+            giveBroadcast(address, ACTION_GRAB);
+        } else {
+            System.out.println("Unknown arguments");
         }
     }
 
-    private void giveBroadcast(SocketAddress socketAddr, String msg) {
+    private void giveBroadcast(String address, String msg) {
         try {
-            // Use local port to send broadcast packet
-            final DatagramSocket datagramSocket = new DatagramSocket(LOCAL_PORT);
+            InetAddress inetAddress = InetAddress.getByName(address);
+            SocketAddress socketAddress = new InetSocketAddress(inetAddress, HOST_PORT);
             try {
-                byte[] buf = new byte[1024];
-                buf = msg.getBytes();
-                DatagramPacket outPacket = new DatagramPacket(buf, buf.length,
-                        socketAddr);
-                datagramSocket.send(outPacket);
-            } catch (IOException e) {
+                // Use local port to send broadcast packet
+                DatagramSocket datagramSocket = new DatagramSocket(LOCAL_PORT);
+                try {
+                    byte[] buf = new byte[1024];
+                    buf = msg.getBytes();
+                    DatagramPacket outPacket = new DatagramPacket(buf, buf.length,
+                            socketAddress);
+                    datagramSocket.send(outPacket);
+                    System.out.println("Send " + msg + " to " + address);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (SocketException e) {
                 e.printStackTrace();
             }
-        } catch (SocketException e) {
+        } catch (UnknownHostException e) {
             e.printStackTrace();
         }
     }

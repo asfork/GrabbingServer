@@ -37,7 +37,7 @@ public class GrabbingServer {
         // listen to LOCAL_PORT
         ServerSocket serverSocket = new ServerSocket(LOCAL_PORT);
         if(serverSocket.isBound())
-            System.out.println("The Server is listenning the port " + LOCAL_PORT);
+            System.out.println("Images handler thread started");
         while(true) {
             //检查是否有连接，该语句是阻塞语句，如果没有则会停在这
             Socket socket = serverSocket.accept();

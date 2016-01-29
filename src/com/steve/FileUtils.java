@@ -51,6 +51,15 @@ public class FileUtils {
     }
 
     public static void writeDevicesList(String json) {
+        try {
+            File jsonFile = new File(jsonFilePath);
+            if (jsonFile.exists()) {
+                jsonFile.createNewFile();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         Type listType = new TypeToken<ArrayList<String>>(){}.getType();
         Type mapType = new TypeToken<Map<String, String>>(){}.getType();
         Gson gson = new Gson();
