@@ -1,15 +1,12 @@
 package com.steve;
 
-/*
- * 该类实现Runnable接口，用于实现多线程复制图片。
- * 该类的作用就是与主线程传入的Socket连接进行通信，从网络流获取对方的传送的文件数据。
- * */
-
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
-
 import java.io.*;
 import java.net.Socket;
 
+/**
+ * 该类实现Runnable接口，用于实现多线程复制图片。
+ * 该类的作用就是与主线程传入的Socket连接进行通信，从网络流获取对方的传送的文件数据。
+ */
 public class ImgHandlerThread implements Runnable {
     Socket socket = null;
     String imgFolder = null;

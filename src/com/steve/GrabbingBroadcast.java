@@ -85,6 +85,7 @@ public class GrabbingBroadcast {
                 SocketAddress socketAddress = new InetSocketAddress(inetAddress, HOST_PORT);
                 giveBroadcast(socketAddress, ACTION_GRAB);
             } else if (getDevices) {   // get available devices list in LAN
+                FileUtils.removeDevicesList();
                 InetAddress inetAddress = InetAddress.getByName(BROADCAST_ADDRESS);
                 SocketAddress socketAddress = new InetSocketAddress(inetAddress, HOST_PORT);
                 giveBroadcast(socketAddress, ACTION_CALL);

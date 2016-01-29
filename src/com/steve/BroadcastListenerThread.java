@@ -24,9 +24,9 @@ public class BroadcastListenerThread implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            String rcvd = "Device on " + inPacket.getSocketAddress() + " is "
-                    + new String(inPacket.getData(), 0, inPacket.getLength());
-            System.out.println(rcvd);
+
+            String json = new String(inPacket.getData(), 0, inPacket.getLength());
+            FileUtils.writeDevicesList(json);
         }
     }
 }
