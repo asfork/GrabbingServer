@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="GrabbingServer:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/GrabbingServer_jar</output-path>
+    <root id="archive" name="GrabbingServer.jar">
+      <element id="module-output" name="GrabbingServer" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../Libraries/args4j-2.32.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../Libraries/gson-2.5.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
