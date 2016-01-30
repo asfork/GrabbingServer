@@ -1,45 +1,69 @@
-## [Install the LAMP stack](https://help.ubuntu.com/community/ApacheMySQLPHP)
+# 项目手册
 
-```sh
-sudo apt-get install lamp-server^
-```
-### Troubleshooting Apache
+## 1. 开发环境
 
-If you get this error:
+IDE: [Android Studio(android app)](http://developer.android.com/sdk/index.html), [Intellij IDEA(server)](https://www.jetbrains.com/idea/)  
+JDK: [ORACLE JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 
-> apache2: Could not determine the server's fully qualified domain name, using 127.0.0.1 for ServerName
+## 2. 目录介绍
 
-Create `fqdn.conf` and enable the new configuration file
+* `grabbing_v1.0.apk` 为安卓端应用，用于拍摄照片并与服务器进行相关通信。在 MIUI 上安装后需要在安全中心打开自启及摄像头等权限，具体步骤参看 `3. 安卓端使用介绍`。
+* `server` 文件夹内为服务端程序，用于发送广播及接收图片等。启动方法参看 `4. 服务端使用介绍`
+* `src` 内为项目源代码。其中 `Grabbing` 为安卓端开发目录，使用 Android Studio 的 `Open an existing Android Studio project` 打开此目录即可。`GrabbingServer` 为 服务端开发目录，使用 Intellij IDEA 或 Eclipse 打开此目录即可。
+* `jre-8u72-windows-i586.exe` 为服务端的 JAVA 运行环境，也可从 [Oracle 官网](http://www.oracle.com/technetwork/java/javase/downloads/index.html) 下载最新版本安装。
 
-```sh
-echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/fqdn.conf && sudo a2enconf fqdn
-```
+## 3. 安卓端使用介绍
 
-## Run File Uploaded Site
+首次安装应用后，为应用开启相应的权限
 
-1. 复制 AndroidFileUpload 文件夹到 `/var/www/` 目录
+* 安全中心→授权管理→自启动管理，设置 Grabbing 允许自启
+* 安全中心→授权管理→应用权限管理，打开 Grabbing 所有权限
+* 首次打开 Grabbing 应用，可能需要手动点击 'START UDP LISTENER' 按钮，通知栏出现 'Broadcast Listener Service & Keeping listening' 即服务监听服务开启成功
 
-2. 修改 `AndroidFileUpload/uploads` 文件夹权限，使上传的文件能保存到 uploads 文件夹中
+红米 2 上默认的 MIUI 会强制终止应用在非前台状态的保持唤醒行为，导致 UDP 广播监听服务随设备进入休眠状态，不能持续监听。  
+解决方案是保持 Grabbing 应用始终处于前台。
+
+## 4. 服务端使用介绍
+
+安装 `jre-8u72-windows-i586.exe` Java 运行环境，并添加 `JAVA_HOME` 等环境变量，具体步骤可参看 [如何安装和配置java环境，让电脑支持java运行](http://jingyan.baidu.com/article/e75aca85b29c3b142edac6a8.html)。
+
+* `GrabbingServer.jar` 用于接收来自设备的广播及图片，需要提前启动
+
     ```sh
-    sudo chown -R www-data:www-data uploads
+    java -jar GrabbingServer.jar
     ```
 
-3. 修改 PHP 配置文件 `/etc/php5/apache2/php.ini` 中下列值，以接收 post 大于 2M 的文件
+* `GrabbingBroadcast.jar` 用于向局域网内设备发送广播，在需要时调用即可。有如下几个可用参数
 
-    > upload_max_filesize = 50M  
-    post_max_size = 50M  
-    max_input_time = 300  
-    max_execution_time = 300
+    > --address (-a) <192.0.0.*> : The IP address of the target device  
+    --give (-g) <command>      : Give broadcast to all devices in LAN (default:grab)
 
-4. 重启 Apache 服务
+* 向所有设备广播，让其拍照并上传照片
+
     ```sh
-    sudo service apache2 restart
+    java -jar GrabbingBroadcast.jar
     ```
 
-## Run UDP Sender Server
+    或者
 
+    ```sh
+    java -jar GrabbingBroadcast.jar -g grab
+    ```
 
-```sh
-javac UDPServer.java
-java UDPServer
-```
+    或者
+
+    ```sh
+    java -jar GrabbingBroadcast.jar --give grab
+    ```
+
+* 获取局域网内所有可用的设备列表
+
+    ```sh
+    java -jar GrabbingBroadcast.jar -g devices
+    ```
+
+* 向某一台设备广播，让其拍照并上传照片
+
+    ```sh
+    java -jar GrabbingBroadcast.jar -a 192.168.1.9
+    ```
